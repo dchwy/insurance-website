@@ -22,3 +22,4 @@ password = "your_mysql_password"
 database = "insurance_db"
 ```
 Replace "your_mysql_password" with your actual MySQL root password
+Name our database in SQL insurance_db
