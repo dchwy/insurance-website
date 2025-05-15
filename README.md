@@ -11,16 +11,8 @@ cd insurance-website
 ```
 pip install -r requirements.txt
 ```
-### 3. Configure MySQL Connection (.streamlit/secrets.toml)
-
-Inside a folder named .streamlit, has a file named secrets.toml with the following content:
+Use
 ```
-[mysql]
-host = "localhost"
-user = "root"
-password = "your_mysql_password"
-database = "insurance_db"
+streamlit run main.py
 ```
-Replace "your_mysql_password" with your actual MySQL root password,
-
-Name our database in SQL is: insurance_db
+to run web and Ctrl C to close
