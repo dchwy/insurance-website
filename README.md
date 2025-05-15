@@ -11,6 +11,16 @@ cd insurance-website
 ```
 pip install -r requirements.txt
 ```
+
+### 3. Take Password from me to change in .streamlit/secrets.toml
+```
+[mysql]
+host = "shinkansen.proxy.rlwy.net"
+port = 47845
+user = "root"
+password = "DM_me_for_password"
+database = "insurance_db"
+```
 Use
 ```
 streamlit run main.py
