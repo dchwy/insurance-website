@@ -6,24 +6,24 @@ def render():
     st.subheader("Business Analyst Dashboard")
     conn = get_connection()
 
-    st.markdown("### 📈 Contract Performance Summary")
-    df1 = pd.read_sql("SELECT * FROM ContractPerformanceSummary", conn)
+    # Tổng thanh toán theo hợp đồng
+    st.markdown("### 📈 Contract Payment Summary")
+    df1 = pd.read_sql("SELECT * FROM Contract_Payment_Summary", conn)
     st.dataframe(df1)
 
+    # Tổng tiền bồi thường
     st.markdown("### 💰 Payout Summary")
-    df2 = pd.read_sql("SELECT * FROM PayoutSummary", conn)
+    df2 = pd.read_sql("SELECT * FROM Payout_Summary", conn)
     st.dataframe(df2)
 
-    st.markdown("### 📊 Claim Success Rate Summary")
-    df3 = pd.read_sql("SELECT * FROM ClaimSuccessRateSummary", conn)
-    st.dataframe(df3)
-
+    # Số hợp đồng theo loại bảo hiểm
     st.markdown("### 🛍 Product Sales Summary")
-    df4 = pd.read_sql("SELECT * FROM ProductSalesSummary", conn)
+    df4 = pd.read_sql("SELECT * FROM Product_Sales_Summary", conn)
     st.dataframe(df4)
 
-    st.markdown("### 📈 Insurance Type Performance Summary")
-    df5 = pd.read_sql("SELECT * FROM InsuranceTypePerformanceSummary", conn)
+    # Số yêu cầu bồi thường theo loại bảo hiểm
+    st.markdown("### 📈 Insurance Type Performance")
+    df5 = pd.read_sql("SELECT * FROM InsuranceType_Performance", conn)
     st.dataframe(df5)
 
     conn.close()

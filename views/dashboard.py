@@ -1,7 +1,7 @@
 import streamlit as st
 from views import (
-    admin, agent, assessor, payout_officer, viewer,
-    finance, management, marketing, product, audit, analytics
+    admin, agent, assessor, viewer,
+    finance, management, product, audit, analytics
 )
 
 def dashboard():
@@ -31,19 +31,13 @@ def dashboard():
         finance.render()
     elif role == "manager_ceo":
         management.render()
-    elif role == "customer_support":
-        agent.render()  # reuse agent view
-    elif role == "underwriting":
-        viewer.render()  # read-only view
-    elif role == "sales_marketing":
-        marketing.render()
     elif role == "product_development":
         product.render()
     elif role == "compliance_audit":
         audit.render()
     elif role == "business_analyst":
         analytics.render()
-    elif role == "viewer":
+    elif role == "customer_support":
         viewer.render()
     else:
         st.error(f"Unknown role: {role}. Contact IT.")

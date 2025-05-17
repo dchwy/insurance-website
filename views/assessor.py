@@ -6,12 +6,19 @@ def render():
     st.subheader("Claim Assessor Dashboard")
     conn = get_connection()
 
-    st.markdown("### 📋 Pending Claims")
-    df1 = pd.read_sql("SELECT * FROM PendingClaims", conn)
+    # Yêu cầu bồi thường đang chờ xử lý
+    st.markdown("### 🕒 Pending Claims")
+    df1 = pd.read_sql("SELECT * FROM Pending_Claims", conn)
     st.dataframe(df1)
 
-    st.markdown("### 💰 Payout Summary")
-    df2 = pd.read_sql("SELECT * FROM PayoutSummary", conn)
+    # Thông tin đánh giá thiệt hại
+    st.markdown("### 📝 Damage Assessments")
+    df2 = pd.read_sql("SELECT * FROM View_Assessment", conn)
     st.dataframe(df2)
+
+    # Toàn bộ yêu cầu bồi thường
+    st.markdown("### 📄 All Insurance Claims")
+    df3 = pd.read_sql("SELECT * FROM View_InsuranceClaim", conn)
+    st.dataframe(df3)
 
     conn.close()
