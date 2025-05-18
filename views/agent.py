@@ -18,7 +18,6 @@ def render():
     if not agent_id:
         st.error("⚠️ No PersonInchargeID found in session.")
         st.stop()
-
     # 1. Create Customer
     st.markdown("### 👤 Create New Customer")
     with st.form("create_customer"):
@@ -29,11 +28,42 @@ def render():
         gender = st.selectbox("Gender", ["Nam", "Nữ"])
         email = st.text_input("Email")
         dob = st.date_input("Date of Birth")
+
         if st.form_submit_button("Create Customer"):
-            call_procedure(conn, "Create_Customer", (fn, ln, address, phone, gender, email, dob))
-            log_action(conn, user, "CREATE_CUSTOMER", f"{fn} {ln} ({email})")
-            st.success("✅ Customer created.")
-            st.rerun()
+            if not all([fn.strip(), ln.strip(), address.strip(), phone.strip(), email.strip()]):
+                st.warning("⚠️ Please enter all required fields.")
+            else:
+                conn2 = get_connection()
+                try:
+                    cursor = conn2.cursor(dictionary=True)
+                    cursor.callproc("Create_Customer", (fn, ln, address, phone, gender, email, dob))
+                    conn2.commit()
+
+                    customer_id = None
+                    for result in cursor.stored_results():
+                        row = result.fetchone()
+                        if row and "CustomerID" in row:
+                            customer_id = row["CustomerID"]
+                            break
+
+                    cursor.close()
+
+                    if customer_id:
+                        st.session_state["new_customer_id"] = customer_id
+                        log_action(conn2, user, "CREATE_CUSTOMER", f"{fn} {ln} ({email}) - ID: {customer_id}")
+                        st.rerun()
+                    else:
+                        st.error("❌ Failed to retrieve CustomerID.")
+                except Exception as e:
+                    st.error(f"❌ Error: {e}")
+                finally:
+                    conn2.close()
+
+    # ✅ Đặt đoạn này sau form, ngoài if
+    if "new_customer_id" in st.session_state:
+        st.success(f"✅ Customer created with ID: {st.session_state['new_customer_id']}")
+        del st.session_state["new_customer_id"]
+
 
     # 2. Create Insurance Contract
     st.markdown("### 📄 Create New Insurance Contract")
@@ -43,13 +73,44 @@ def render():
         sign_date = st.date_input("Sign Date")
         effective = st.date_input("Effective Date")
         expiry = st.date_input("Expiration Date")
+
         if st.form_submit_button("Create Contract"):
-            call_procedure(conn, "Create_Insurance_Contract", (
-                customer_id, insurance_type_id, agent_id, sign_date, effective, expiry
-            ))
-            log_action(conn, user, "CREATE_CONTRACT", f"For customer {customer_id}, type {insurance_type_id}")
-            st.success("✅ Contract created.")
-            st.rerun()
+            if not all([customer_id.strip(), insurance_type_id.strip()]):
+                st.warning("⚠️ Please enter both Customer ID and Insurance Type ID.")
+            else:
+                conn2 = get_connection()
+                try:
+                    cursor = conn2.cursor(dictionary=True)
+                    cursor.callproc("Create_Insurance_Contract", (
+                        customer_id, insurance_type_id, agent_id, sign_date, effective, expiry
+                    ))
+                    conn2.commit()
+
+                    contract_id = None
+                    for result in cursor.stored_results():
+                        row = result.fetchone()
+                        if row and "ContractID" in row:
+                            contract_id = row["ContractID"]
+                            break
+
+                    cursor.close()
+
+                    if contract_id:
+                        st.session_state["new_contract_id"] = contract_id
+                        log_action(conn2, user, "CREATE_CONTRACT", f"{contract_id} for customer {customer_id}")
+                        st.rerun()
+                    else:
+                        st.error("❌ Failed to retrieve ContractID.")
+                except Exception as e:
+                    st.error(f"❌ Error: {e}")
+                finally:
+                    conn2.close()
+
+# ✅ Hiển thị sau khi rerun
+if "new_contract_id" in st.session_state:
+    st.success(f"✅ Contract created with ID: {st.session_state['new_contract_id']}")
+    del st.session_state["new_contract_id"]
+
 
     # 3. View contracts assigned to this agent
     st.markdown("### 📋 Your Contracts")
