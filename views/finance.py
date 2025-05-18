@@ -33,14 +33,54 @@ def render():
     # 4. Update Payout Status
     st.markdown("---")
     st.markdown("## 🔄 Update Payout Status")
+
     with st.form("update_payout_status"):
         payout_id = st.text_input("Payout ID")
-        new_status = st.selectbox("New Status", ["Pending", "Paid", "Rejected"])
+        new_status = st.selectbox("New Status", ["Pending", "Paid"])
 
         if st.form_submit_button("Update Status"):
-            call_procedure(conn, "Update_PayoutStatus", (payout_id, new_status))
-            log_action(conn, user, "UPDATE_PAYOUT_STATUS", f"PayoutID {payout_id} -> {new_status}")
-            st.success("✅ Payout status updated!")
-            st.rerun()
+            if not payout_id.strip():
+                st.warning("⚠️ Please enter the Payout ID.")
+            else:
+                try:
+                    conn2 = get_connection()  # 🔁 kết nối mới
+                    call_procedure(conn2, "Update_PayoutStatus", (payout_id, new_status))
+                    log_action(conn2, user, "UPDATE_PAYOUT_STATUS", f"PayoutID {payout_id} -> {new_status}")
+                    st.success("✅ Payout status updated!")
+                    st.rerun()
+                except Exception as e:
+                    st.error(f"❌ Error: {e}")
+                finally:
+                    conn2.close()
+                    
+    st.markdown("### 💰 Create New Payment")
+    with st.form("create_payment_form"):
+        contract_id = st.text_input("Contract ID")
+        payment_date = st.date_input("Payment Date")
+        payment_method = st.selectbox("Payment Method", ["Tiền mặt", "Chuyển khoản"])
+        amount = st.number_input("Amount (VNĐ)", min_value=1000, step=1000)
+
+        if st.form_submit_button("Create Payment"):
+            if not contract_id.strip():
+                st.warning("⚠️ Please enter the Contract ID.")
+            else:
+                try:
+                    conn = get_connection()
+                    cursor = conn.cursor()
+                    cursor.callproc("Create_NewPayment", (
+                        contract_id, payment_date, payment_method, amount
+                    ))
+                    conn.commit()  # ✅ ensure the insert is saved
+                    cursor.close()
+
+                    log_action(conn, user, "CREATE_PAYMENT", f"{contract_id} - {payment_method} - {amount} VNĐ")
+                    st.success("✅ New payment has been recorded.")
+                    st.rerun()
+
+                except Exception as e:
+                    st.error(f"❌ Error: {e}")
+                finally:
+                    conn.close()
+
 
     conn.close()

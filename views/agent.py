@@ -106,10 +106,10 @@ def render():
                 finally:
                     conn2.close()
 
-# ✅ Hiển thị sau khi rerun
-if "new_contract_id" in st.session_state:
-    st.success(f"✅ Contract created with ID: {st.session_state['new_contract_id']}")
-    del st.session_state["new_contract_id"]
+    # ✅ Hiển thị sau khi rerun
+    if "new_contract_id" in st.session_state:
+        st.success(f"✅ Contract created with ID: {st.session_state['new_contract_id']}")
+        del st.session_state["new_contract_id"]
 
 
     # 3. View contracts assigned to this agent
@@ -150,8 +150,7 @@ if "new_contract_id" in st.session_state:
                 st.error(f"❌ Error while retrieving payout: {e}")
             finally:
                 conn2.close()
-
-    # 6. Add insured person
+    #6
     st.markdown("### 👨 Add Insured Person")
     with st.form("add_insured_person"):
         contract = st.text_input("Contract ID", key="ip1")
@@ -162,13 +161,21 @@ if "new_contract_id" in st.session_state:
         gender = st.selectbox("Gender", ["Nam", "Nữ"], key="ip6")
         email = st.text_input("Email", key="ip7")
         addr = st.text_input("Address", key="ip8")
-        if st.form_submit_button("Add Person"):
-            call_procedure(conn, "Insert_InsuredPerson", (contract, "AUTO", first, last, phone, dob, gender, email, addr))
-            log_action(conn, user, "ADD_INSURED_PERSON", f"{first} {last} in contract {contract}")
-            st.success("✅ Insured person added.")
-            st.rerun()
 
-    # 7. Add insured car
+        if st.form_submit_button("Add Person"):
+            if not all([contract.strip(), first.strip(), last.strip()]):
+                st.warning("⚠️ Please fill in all required fields.")
+            else:
+                try:
+                    conn2 = get_connection()
+                    call_procedure(conn2, "Insert_InsuredPerson", (contract, first, last, phone, dob, gender, email, addr))
+                    log_action(conn2, user, "ADD_INSURED_PERSON", f"{first} {last} in contract {contract}")
+                    st.success("✅ Insured person added.")
+                except Exception as e:
+                    st.error(f"❌ Error: {e}")
+                finally:
+                    conn2.close()
+                    
     st.markdown("### 🚗 Add Insured Car")
     with st.form("add_car"):
         contract = st.text_input("Contract ID", key="car1")
@@ -176,11 +183,21 @@ if "new_contract_id" in st.session_state:
         value = st.number_input("Vehicle Value", key="car3", min_value=0.0)
         plate = st.text_input("License Plate", key="car4")
         year = st.date_input("Manufacture Year", key="car5")
+
         if st.form_submit_button("Add Car"):
-            call_procedure(conn, "Insert_InsuredCar", (contract, name, value, plate, year))
-            log_action(conn, user, "ADD_INSURED_CAR", f"{plate} - {name} in contract {contract}")
-            st.success("✅ Car added.")
-            st.rerun()
+            if not all([contract.strip(), name.strip(), plate.strip()]):
+                st.warning("⚠️ Please fill in all required fields.")
+            else:
+                try:
+                    conn2 = get_connection()
+                    call_procedure(conn2, "Insert_InsuredCar", (contract, name, value, plate, year))
+                    log_action(conn2, user, "ADD_INSURED_CAR", f"{plate} - {name} in contract {contract}")
+                    st.success("✅ Car added.")
+                except Exception as e:
+                    st.error(f"❌ Error: {e}")
+                finally:
+                    conn2.close()
+
 
     # 8. Add insured home
     st.markdown("### 🏠 Add Insured Home")
@@ -191,11 +208,20 @@ if "new_contract_id" in st.session_state:
         area = st.number_input("Area (m²)", key="home4")
         year = st.date_input("Year Built", key="home5")
         value = st.number_input("Property Value", key="home6", min_value=0.0)
+
         if st.form_submit_button("Add Home"):
-            call_procedure(conn, "Insert_InsuredHome", (contract, address, prop_type, area, year, value))
-            log_action(conn, user, "ADD_INSURED_HOME", f"{address}, type {prop_type}, value {value}")
-            st.success("✅ Home added.")
-            st.rerun()
+            if not contract.strip() or not address.strip():
+                st.warning("⚠️ Please fill in all required fields.")
+            else:
+                try:
+                    conn2 = get_connection()
+                    call_procedure(conn2, "Insert_InsuredHome", (contract, address, prop_type, area, year, value))
+                    log_action(conn2, user, "ADD_INSURED_HOME", f"{address}, type {prop_type}, value {value}")
+                    st.success("✅ Home added.")
+                except Exception as e:
+                    st.error(f"❌ Error: {e}")
+                finally:
+                    conn2.close()
 
     # 9. Add beneficiary
     st.markdown("### 👥 Add Beneficiary")
@@ -210,12 +236,22 @@ if "new_contract_id" in st.session_state:
         email = st.text_input("Email", key="ben8")
         addr = st.text_input("Address", key="ben9")
         percent = st.number_input("Percentage (%)", 0.0, 100.0, key="ben10")
+
         if st.form_submit_button("Add Beneficiary"):
-            call_procedure(conn, "Insert_Beneficiary", (
-                contract, ben_id, first, last, phone, dob, gender, email, addr, percent
-            ))
-            log_action(conn, user, "ADD_BENEFICIARY", f"{first} {last} - {percent}% in contract {contract}")
-            st.success("✅ Beneficiary added.")
-            st.rerun()
+            if not all([contract.strip(), ben_id.strip(), first.strip(), last.strip()]):
+                st.warning("⚠️ Please fill in all required fields.")
+            else:
+                try:
+                    conn2 = get_connection()
+                    call_procedure(conn2, "Insert_Beneficiary", (
+                        contract, ben_id, first, last, phone, dob, gender, email, addr, percent
+                    ))
+                    log_action(conn2, user, "ADD_BENEFICIARY", f"{first} {last} - {percent}% in contract {contract}")
+                    st.success("✅ Beneficiary added.")
+                except Exception as e:
+                    st.error(f"❌ Error: {e}")
+                finally:
+                    conn2.close()
+
 
     conn.close()

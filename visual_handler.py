@@ -1,6 +1,7 @@
 import streamlit as st
 import base64
 
+
 def set_background_from_local(image_path: str):
     """
     Dùng ảnh nền từ file local (nội bộ) trong dự án Streamlit.
@@ -24,34 +25,33 @@ def set_background_from_local(image_path: str):
 
 
 def display_footer():
-
     st.markdown("""
-    <footer style="background-color: rgba(0, 0, 0, 0.7); padding: 20px; text-align: center; color: white; position: fixed; bottom: 0; left: 0; width: 100%; z-index: 9999;">
-        <div style="font-size: 24px; font-weight: bold;">
+    <footer style="background-color: rgba(39, 185, 126, 0.72); padding: 0px; text-align: center; color: white; position: fixed; bottom: 0; left: 0; width: 100%; z-index: 9999;">
+        <div style="font-size: 18px; font-weight: bold;">
             INSURANCE WEBSITE MANAGEMENT™
         </div>
-        <div>
+        <div style="display: flex; justify-content: center; gap: 16px;">
             <a href="https://www.facebook.com/profile.php?id=61567855092141&is_tour_dismissed" target="_blank">
-                <i class="fab fa-facebook" style="font-size: 24px; margin: 10px;"></i>
+                <i class="fab fa-facebook" style="font-size: 24px; color: white;"></i>
             </a>
             <a href="https://www.instagram.com/_calm_kitchen_/" target="_blank">
-                <i class="fab fa-instagram" style="font-size: 24px; margin: 10px;"></i>
+                <i class="fab fa-instagram" style="font-size: 24px; color: white;"></i>
             </a>
             <a href="https://twitter.com" target="_blank">
-                <i class="fab fa-twitter" style="font-size: 24px; margin: 10px;"></i>
+                <i class="fab fa-twitter" style="font-size: 24px; color: white;"></i>
             </a>
             <a href="https://www.youtube.com/@gordonramsay" target="_blank">
-                <i class="fab fa-youtube" style="font-size: 24px; margin: 10px;"></i>
+                <i class="fab fa-youtube" style="font-size: 24px; color: white;"></i>
             </a>
             <a href="https://www.linkedin.com" target="_blank">
-                <i class="fab fa-linkedin" style="font-size: 24px; margin: 10px;"></i>
+                <i class="fab fa-linkedin" style="font-size: 24px; color: white;"></i>
             </a>
         </div>
-        <div style="margin-top: 10px;">
+        <div style="margin-top: 5px;">
             <a href="/about_us" style="margin-right: 20px; text-decoration: none; color: white;">About Us</a>
             <a href="/contact_us" style="text-decoration: none; color: white;">Contact Us</a>
         </div>
-        <div style="margin-top: 20px; font-size: 14px; color: #bbb;">
+        <div style="margin-top: 5px; font-size: 14px; color: white;">
             Copyright © Insurance Website - DSEB 65B
         </div>
     </footer>

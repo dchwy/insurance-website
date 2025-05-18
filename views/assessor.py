@@ -30,25 +30,6 @@ def render():
     claims = pd.read_sql("SELECT * FROM View_InsuranceClaim", conn)
     st.dataframe(claims)
 
-    # 4. Insert new assessment
-    st.markdown("---")
-    st.markdown("## ➕ Add New Assessment")
-    with st.form("insert_assessment"):
-        claim_id = st.text_input("Claim ID")
-        assessment_date = st.date_input("Assessment Date")
-        result = st.selectbox("Result", ["Approved", "Rejected", "Pending"])
-        severity = st.selectbox("Severity Level", ["Low", "Medium", "High"])
-        review_date = st.date_input("Review Date")
-        notes = st.text_area("Notes")
-
-        if st.form_submit_button("Submit Assessment"):
-            call_procedure(conn, "Insert_Assessment", (
-                assessment_date, result, severity, review_date, notes, claim_id
-            ))
-            log_action(conn, user, "INSERT_ASSESSMENT", f"{claim_id} - {result} - {severity}")
-            st.success("✅ Assessment submitted successfully!")
-            st.rerun()
-
     # 5. Create new payout
     st.markdown("---")
     st.markdown("## 💸 Create Payout after Approved Assessment")
@@ -56,7 +37,7 @@ def render():
         claim_id = st.text_input("Claim ID for payout", key="payout_claim_id")
         amount = st.number_input("Amount", min_value=0.0)
         payout_date = st.date_input("Payout Date")
-        method = st.selectbox("Payout Method", ["Bank Transfer", "Cash"])
+        method = st.selectbox("Payout Method", ["Chuyển khoản", "Tiền Mặt"])
         status = st.selectbox("Payout Status", ["Pending", "Paid"])
 
         if st.form_submit_button("Create Payout"):
@@ -68,3 +49,59 @@ def render():
             st.rerun()
 
     conn.close()
+
+
+    st.markdown("### ➕ Add New Assessment")
+    with st.form("insert_assessment"):
+        aid = st.text_input("Assessment ID")
+        claim_id = st.text_input("Claim ID")
+        date = st.date_input("Assessment Date")
+        severity = st.selectbox("Severity Level", ["Low", "Medium", "High"])
+        review = st.date_input("Review Date")
+        notes = st.text_area("Notes")
+
+        if st.form_submit_button("Submit Assessment"):
+            if not all([aid.strip(), claim_id.strip(), notes.strip()]):
+                st.warning("⚠️ Please fill in all required fields.")
+            else:
+                try:
+                    conn = get_connection()
+                    cursor = conn.cursor()
+                    cursor.callproc("Insert_Assessment", (
+                        aid, claim_id, date, severity, review, notes
+                    ))
+                    conn.commit()  # ✅ thêm commit
+                    cursor.close()
+
+                    log_action(conn, user, "INSERT_ASSESSMENT", f"{aid} for Claim {claim_id}")
+                    st.success("✅ Assessment added.")
+                    st.rerun()
+                except Exception as e:
+                    st.error(f"❌ Error: {e}")
+                finally:
+                    conn.close()
+
+
+    st.markdown("### 🔄 Update Assessment Result")
+    with st.form("update_assessment_result"):
+        assessment_id = st.text_input("Assessment ID")
+        new_result = st.selectbox("New Result", ["Approved", "Rejected", "Pending"])
+
+        if st.form_submit_button("Update Result"):
+            if not assessment_id.strip():
+                st.warning("⚠️ Please enter the Assessment ID.")
+            else:
+                try:
+                    conn = get_connection()
+                    cursor = conn.cursor()
+                    cursor.callproc("Update_Assessment_Result", (assessment_id, new_result))
+                    conn.commit()  # ✅ thêm commit
+                    cursor.close()
+
+                    log_action(conn, user, "UPDATE_ASSESSMENT_RESULT", f"{assessment_id} → {new_result}")
+                    st.success("✅ Assessment result updated.")
+                    st.rerun()
+                except Exception as e:
+                    st.error(f"❌ Error: {e}")
+                finally:
+                    conn.close()

@@ -25,7 +25,7 @@ def dashboard():
         admin.render()
     elif role == "insurance_agent":
         agent.render()
-    elif role == "claim_assessor":
+    elif role == "claim_asessor":
         assessor.render()
     elif role == "finance_staff":
         finance.render()

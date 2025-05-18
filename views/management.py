@@ -27,18 +27,7 @@ def render():
         st.markdown(f"### 📄 {table}")
         df = pd.read_sql(f"SELECT * FROM {table}", conn)
         st.dataframe(df)
-        log_ceo_view(conn, ceo_id, table)
 
-    # 🧾 View Audit Logs
-    st.markdown("---")
-    st.subheader("📒 Audit Log")
-    df_log = pd.read_sql(
-        "SELECT a.*, u.FullName FROM AuditLog a JOIN Users u ON a.User_id = u.User_id ORDER BY Timestamp DESC",
-        conn
-    )
-    st.dataframe(df_log)
-    
-    st.markdown("---")
-    st.subheader("📒 Audit Log")
-    render_auditlog()  
+    render_auditlog()
+
     conn.close()

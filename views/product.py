@@ -33,18 +33,38 @@ def render():
     df_sales = pd.read_sql("SELECT * FROM Product_Sales_Summary", conn)
     st.dataframe(df_sales)
 
-    # 4. Add new insurance type
-    st.markdown("---")
+    # 4
     st.markdown("## ➕ Add New Insurance Type")
+
     with st.form("add_insurance_type"):
+        type_id = st.text_input("Insurance Type ID")
         name = st.text_input("Insurance Name")
         description = st.text_area("Description")
-        policy = st.text_area("Policy Terms")
+
         if st.form_submit_button("Add Type"):
-            call_procedure(conn, "Insert_InsuranceType", (name, description, policy))
-            log_action(conn, user, "ADD_INSURANCE_TYPE", f"{name} - {policy}")
-            st.success("✅ Insurance type added.")
-            st.rerun()
+            if not all([type_id.strip(), name.strip(), description.strip()]):
+                st.warning("⚠️ Please fill in all required fields.")
+            else:
+                try:
+                    conn = get_connection()
+                    cursor = conn.cursor()
+                    cursor.callproc("Insert_InsuranceType", (type_id, name, description))
+                    conn.commit()  # ✅ Ensure data is saved
+                    cursor.close()
+
+                    log_action(conn, user, "ADD_INSURANCE_TYPE", f"{type_id} - {name}")
+                    st.success("✅ Insurance type added.")
+                    st.rerun()
+
+                except Exception as e:
+                    error_msg = str(e)
+                    if "Duplicate entry" in error_msg or "already exists" in error_msg:
+                        st.error("❌ Insurance Type ID already exists. Please choose a unique ID.")
+                    else:
+                        st.error(f"❌ Error: {error_msg}")
+                finally:
+                    conn.close()
+
 
     # 5. Claim approval rate
     st.markdown("### 📈 Claim Approval Rate by Insurance Type")
