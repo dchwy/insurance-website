@@ -3,11 +3,21 @@ from utils.auth import verify_user
 from visual_handler import set_background_from_local
 from visual_handler import display_footer
 
+def init_session_keys():
+    defaults = {
+        "user": None,
+        "role": None,
+        "staff_id": None
+    }
+    for k, v in defaults.items():
+        if k not in st.session_state:
+            st.session_state[k] = v
+            
+            
 def login():
     set_background_from_local("assets/background.jpg")
 
-    if "user" not in st.session_state:
-        st.session_state.user = None
+    init_session_keys()
 
     # Tiêu đề lớn nằm trên đầu, căn giữa toàn bộ trang
     st.markdown("<h1 style='text-align: center; color: white; margin-top: -2rem; margin-bottom: 0rem;'>Insurance Management System</h1>", unsafe_allow_html=True)
