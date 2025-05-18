@@ -11,8 +11,13 @@ def dashboard():
     if not user:
         st.warning("You are not logged in.")
         return
+        
+    st.sidebar.markdown(f"👤 **{user['FullName']}**")
+    role_display = user['RoleName'].replace('_', ' ').title()
+    st.sidebar.markdown(f"🔰 {role_display}")
+    st.sidebar.markdown(f"📧 Email: {user['Email']}")
+    st.sidebar.markdown(f"📱 Phone: {user['PhoneNumber']}")
 
-    st.sidebar.subheader(f"👤 {user['FullName']} ({user['RoleName']})")
 
     # 🚪 Nút đăng xuất
     if st.sidebar.button("🚪 Logout"):

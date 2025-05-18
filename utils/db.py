@@ -10,9 +10,11 @@ def get_connection():
         database=st.secrets["mysql"]["database"]
     )
 
-
 def call_procedure(conn, proc_name, args=()):
     cursor = conn.cursor()
     cursor.callproc(proc_name, args)
-    conn.commit()
+    result = []
+    for res in cursor.stored_results():
+        result.extend(res.fetchall())
     cursor.close()
+    return result

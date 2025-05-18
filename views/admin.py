@@ -23,6 +23,19 @@ def delete_user(conn, user_id):
 
 def render():
     set_background_from_local("assets/background.jpg")
+    st.markdown("""
+        <style>
+            .custom-email {
+                color: #006400 !important;  /* DarkGreen */
+                text-decoration: none;
+            }
+            .custom-email:hover {
+                text-decoration: underline;
+            }
+        </style>
+    """, unsafe_allow_html=True)
+
+
     st.header("👨‍💻 User Management (Admin)")
 
     conn = get_connection()
@@ -70,10 +83,23 @@ def render():
             continue
         with st.container():
             col1, col2, col3, col4, col5 = st.columns([2, 3, 2, 3, 1])
+            col1.markdown(f"""
+                <div style='font-size:18px; font-weight:bold;'>
+                    {row['FullName']}
+                </div>
+            """, unsafe_allow_html=True)
 
-            col1.markdown(f"**{row['FullName']}**")
-            col2.markdown(row['Email'])
-            col3.markdown(row['PhoneNumber'])
+            col2.markdown(f"""
+                <div style='font-size:16px; color:#006400;'>
+                    {row['Email']}
+                </div>
+            """, unsafe_allow_html=True)
+
+            col3.markdown(f"""
+                <div style='font-size:16px;'>
+                    {row['PhoneNumber']}
+                </div>
+            """, unsafe_allow_html=True)
 
             current_role = row['RoleName']
             role_keys = list(role_options.keys())
@@ -99,22 +125,23 @@ def render():
                     st.rerun()
                 except Exception as e:
                     st.error(f"❌ Error deleting user: {e}")
+        # Thêm đường phân cách nếu chưa phải dòng cuối
+        if i < len(df_users) - 1:
+            st.markdown("<hr style='border-top: 1px solid white;'>", unsafe_allow_html=True)
+
+
+            
 
     st.markdown("### 📋 View All Tables")
-    table_list = [
-        "Customers", "InsuranceTypes", "PersonIncharge", "InsuranceContracts",
-        "Payments", "InsuranceClaim", "Beneficiaries", "InsuredPerson",
-        "Assessments", "Payouts"
+    table_options = [
+        "Customers", "InsuranceContracts", "InsuranceClaim", "Payouts",
+        "Payments", "Assessments", "PersonIncharge", "Users"
     ]
 
-    for table in table_list:
-        with st.expander(f"📄 Table: {table}"):
-            try:
-                df = pd.read_sql(f"SELECT * FROM {table}", conn)
-                st.dataframe(df)
-            except Exception as e:
-                st.error(f"❌ Error loading table `{table}`: {e}")
-    st.markdown("---")
-    render_auditlog()  
+    selected_tables = st.multiselect("📂 Select tables to view", table_options)
 
+    for table in selected_tables:
+        st.markdown(f"### 📄 {table}")
+        df = pd.read_sql(f"SELECT * FROM {table}", conn)
+        st.dataframe(df)
     conn.close()
