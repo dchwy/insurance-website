@@ -9,3 +9,10 @@ def get_connection():
         password=st.secrets["mysql"]["password"],
         database=st.secrets["mysql"]["database"]
     )
+
+
+def call_procedure(conn, proc_name, args=()):
+    cursor = conn.cursor()
+    cursor.callproc(proc_name, args)
+    conn.commit()
+    cursor.close()

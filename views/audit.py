@@ -1,25 +1,30 @@
 import streamlit as st
 import pandas as pd
 from utils.db import get_connection
-
+from visual_handler import set_background_from_local
 def render():
-    st.subheader("Audit & Compliance Dashboard")
+    set_background_from_local("assets/background.jpg")
+    st.subheader("🛡 Compliance & Audit Dashboard")
     conn = get_connection()
 
-    st.markdown("### 🔍 Claim Status Summary")
-    df1 = pd.read_sql("SELECT * FROM Total_Claim_By_Status", conn)
-    st.dataframe(df1)
+    # 1. View: Payout Summary
+    st.markdown("### 💸 Payout Summary by Contract")
+    df_payout = pd.read_sql("SELECT * FROM Payout_Summary", conn)
+    st.dataframe(df_payout)
 
-    st.markdown("### 💸 Payout Summary")
-    df2 = pd.read_sql("SELECT * FROM Payout_Summary", conn)
-    st.dataframe(df2)
+    # 2. View: Contract Payment Summary
+    st.markdown("### 🧾 Total Payments by Contract")
+    df_payment = pd.read_sql("SELECT * FROM Contract_Payment_Summary", conn)
+    st.dataframe(df_payment)
 
-    st.markdown("### 🧑‍💼 Person In Charge")
-    df3 = pd.read_sql("SELECT * FROM View_PersonIncharge_Admin", conn)
-    st.dataframe(df3)
+    # 3. View: Unpaid Contracts
+    st.markdown("### ⚠️ Unpaid Contracts")
+    df_unpaid = pd.read_sql("SELECT * FROM Unpaid_Contracts", conn)
+    st.dataframe(df_unpaid)
 
-    st.markdown("### 📑 All Insurance Claims (Admin)")
-    df4 = pd.read_sql("SELECT * FROM View_InsuranceClaim_Admin", conn)
-    st.dataframe(df4)
+    # 4. View: Audit Log
+    st.markdown("### 📋 Audit Log")
+    df_log = pd.read_sql("SELECT * FROM AuditLog ORDER BY Timestamp DESC", conn)
+    st.dataframe(df_log)
 
     conn.close()

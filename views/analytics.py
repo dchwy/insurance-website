@@ -1,29 +1,52 @@
 import streamlit as st
 import pandas as pd
 from utils.db import get_connection
+from visual_handler import set_background_from_local
+def call_procedure(conn, proc_name):
+    cursor = conn.cursor()
+    cursor.callproc(proc_name)
+    result = []
+    for res in cursor.stored_results():
+        result.extend(res.fetchall())
+    cursor.close()
+    return result
 
 def render():
-    st.subheader("Business Analyst Dashboard")
+    set_background_from_local("assets/background.jpg")
+    st.subheader("📊 Business Analyst Dashboard")
     conn = get_connection()
 
-    # Tổng thanh toán theo hợp đồng
-    st.markdown("### 📈 Contract Payment Summary")
-    df1 = pd.read_sql("SELECT * FROM Contract_Payment_Summary", conn)
-    st.dataframe(df1)
+    # 1. Customer & Contract Count
+    st.markdown("### 📋 Customer and Contract Summary")
+    result = call_procedure(conn, "Customer_And_Contract_Count")
+    if result:
+        df_summary = pd.DataFrame(result, columns=["TotalCustomers", "TotalContracts"])
+        st.metric("Total Customers", df_summary['TotalCustomers'][0])
+        st.metric("Total Contracts", df_summary['TotalContracts'][0])
 
-    # Tổng tiền bồi thường
-    st.markdown("### 💰 Payout Summary")
-    df2 = pd.read_sql("SELECT * FROM Payout_Summary", conn)
-    st.dataframe(df2)
+    # 2. Insurance Claims
+    st.markdown("### 📄 Insurance Claims")
+    df_claims = pd.read_sql("SELECT * FROM View_InsuranceClaim", conn)
+    st.dataframe(df_claims)
 
-    # Số hợp đồng theo loại bảo hiểm
-    st.markdown("### 🛍 Product Sales Summary")
-    df4 = pd.read_sql("SELECT * FROM Product_Sales_Summary", conn)
-    st.dataframe(df4)
+    # 3. Payouts
+    st.markdown("### 💸 Payout Transactions")
+    df_payouts = pd.read_sql("SELECT * FROM View_Payouts", conn)
+    st.dataframe(df_payouts)
 
-    # Số yêu cầu bồi thường theo loại bảo hiểm
-    st.markdown("### 📈 Insurance Type Performance")
-    df5 = pd.read_sql("SELECT * FROM InsuranceType_Performance", conn)
-    st.dataframe(df5)
+    # 4. Payments
+    st.markdown("### 🧾 Payment Records")
+    df_payments = pd.read_sql("SELECT * FROM View_Payments", conn)
+    st.dataframe(df_payments)
+
+    # 5. Contract by Month
+    st.markdown("### 📆 Contracts by Month")
+    df_month = pd.read_sql("SELECT * FROM Contract_By_Month", conn)
+    st.dataframe(df_month)
+
+    # 6. Product Sales
+    st.markdown("### 📦 Product Sales Summary")
+    df_product = pd.read_sql("SELECT * FROM Product_Sales_Summary", conn)
+    st.dataframe(df_product)
 
     conn.close()

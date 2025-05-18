@@ -39,4 +39,4 @@ def get_all_roles():
         return cursor.fetchall()
     finally:
         cursor.close()
-        conn.close()
+        conn.close()    

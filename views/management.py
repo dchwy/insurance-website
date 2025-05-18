@@ -1,29 +1,44 @@
 import streamlit as st
 import pandas as pd
 from utils.db import get_connection
+from views.auditlog_view import render_auditlog
+from visual_handler import set_background_from_local
+def log_ceo_view(conn, user_id, table_name):
+    cursor = conn.cursor()
+    cursor.callproc("LogCEOView", (user_id, table_name))
+    conn.commit()
+    cursor.close()
 
 def render():
-    st.subheader("Executive (CEO) Dashboard")
+    set_background_from_local("assets/background.jpg")
+    st.subheader("👑 CEO Dashboard – Full System Overview")
     conn = get_connection()
+    user = st.session_state.get("user", {})
+    ceo_id = user.get("user_id")
 
-    st.markdown("### 📊 Contract Statistics by Month")
-    df1 = pd.read_sql("SELECT * FROM Contract_By_Month", conn)
-    st.dataframe(df1)
+    table_options = [
+        "Customers", "InsuranceContracts", "InsuranceClaim", "Payouts",
+        "Payments", "Assessments", "PersonIncharge", "Users"
+    ]
 
-    st.markdown("### 🛍 Product Sales Summary")
-    df2 = pd.read_sql("SELECT * FROM Product_Sales_Summary", conn)
-    st.dataframe(df2)
+    selected_tables = st.multiselect("📂 Select tables to view", table_options)
 
-    st.markdown("### 📈 Insurance Type Performance")
-    df3 = pd.read_sql("SELECT * FROM InsuranceType_Performance", conn)
-    st.dataframe(df3)
+    for table in selected_tables:
+        st.markdown(f"### 📄 {table}")
+        df = pd.read_sql(f"SELECT * FROM {table}", conn)
+        st.dataframe(df)
+        log_ceo_view(conn, ceo_id, table)
 
-    st.markdown("### 📉 Expiring Contracts (30 Days)")
-    df4 = pd.read_sql("SELECT * FROM Expiring_Contracts", conn)
-    st.dataframe(df4)
-
-    st.markdown("### 💸 Payout Summary")
-    df5 = pd.read_sql("SELECT * FROM Payout_Summary", conn)
-    st.dataframe(df5)
-
+    # 🧾 View Audit Logs
+    st.markdown("---")
+    st.subheader("📒 Audit Log")
+    df_log = pd.read_sql(
+        "SELECT a.*, u.FullName FROM AuditLog a JOIN Users u ON a.User_id = u.User_id ORDER BY Timestamp DESC",
+        conn
+    )
+    st.dataframe(df_log)
+    
+    st.markdown("---")
+    st.subheader("📒 Audit Log")
+    render_auditlog()  
     conn.close()

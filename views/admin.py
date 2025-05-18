@@ -2,7 +2,8 @@ import streamlit as st
 import pandas as pd
 from utils.auth import hash_password, get_all_roles
 from utils.db import get_connection
-
+from views.auditlog_view import render_auditlog
+from visual_handler import set_background_from_local
 # Call stored procedures
 
 def create_user(conn, username, password_hash, full_name, email, phone, role_id, staff_id):
@@ -21,6 +22,7 @@ def delete_user(conn, user_id):
     conn.commit()
 
 def render():
+    set_background_from_local("assets/background.jpg")
     st.header("👨‍💻 User Management (Admin)")
 
     conn = get_connection()
@@ -112,5 +114,7 @@ def render():
                 st.dataframe(df)
             except Exception as e:
                 st.error(f"❌ Error loading table `{table}`: {e}")
+    st.markdown("---")
+    render_auditlog()  
 
     conn.close()
