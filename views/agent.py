@@ -60,15 +60,35 @@ def render():
     st.markdown("### 🔍 Get Contract Details by Customer ID")
     customer_lookup = st.text_input("Enter Customer ID", key="details_lookup")
     if st.button("View Contract Details"):
-        df_detail = pd.read_sql(f"CALL Get_ContractDetails('{customer_lookup}')", conn)
-        st.dataframe(df_detail)
+        conn = get_connection()  # ✅ Lấy kết nối tươi mới
+        try:
+            df_detail = pd.read_sql(f"CALL Get_ContractDetails('{customer_lookup}')", conn)
+            st.dataframe(df_detail)
+        except Exception as e:
+            st.error(f"❌ Error: {e}")
+        finally:
+            conn.close()
+
 
     # 5. View payout by contract
     st.markdown("### 💸 Payout Details by Contract ID")
     contract_lookup = st.text_input("Enter Contract ID", key="payout_lookup")
+
     if st.button("View Payout Details"):
-        df_payout = pd.read_sql(f"CALL Payout_Detail_Summary('{contract_lookup}')", conn)
-        st.dataframe(df_payout)
+        if not contract_lookup:
+            st.warning("⚠️ Please enter a contract ID.")
+        else:
+            try:
+                conn2 = get_connection()  # 🔁 lấy lại kết nối tươi
+                df_payout = pd.read_sql(f"CALL Payout_Detail_Summary('{contract_lookup}')", conn2)
+                if df_payout.empty:
+                    st.info("No payout data found for this contract.")
+                else:
+                    st.dataframe(df_payout)
+            except Exception as e:
+                st.error(f"❌ Error while retrieving payout: {e}")
+            finally:
+                conn2.close()
 
     # 6. Add insured person
     st.markdown("### 👨 Add Insured Person")
