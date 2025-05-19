@@ -26,8 +26,8 @@ def render():
     st.dataframe(assessments)
 
     # 3. View: All Insurance Claims
-    st.markdown("### 📄 All Insurance Claims")
-    claims = pd.read_sql("SELECT * FROM View_InsuranceClaim", conn)
+    st.markdown("### 📄 Insurance Type Performance")
+    claims = pd.read_sql("SELECT * FROM InsuranceType_Performance ", conn)
     st.dataframe(claims)
 
     # 5. Create new payout

@@ -254,4 +254,54 @@ def render():
                     conn2.close()
 
 
+    # 10. Create New Insurance Claim
+    st.markdown("### 📝 Create New Insurance Claim")
+    with st.form("create_claim_form"):
+        contract_id = st.text_input("Contract ID")
+        claim_date = st.date_input("Claim Date")
+        amount = st.number_input("Claim Amount", min_value=0)
+        description = st.text_area("Description")
+        event_date = st.date_input("Event Date")
+        event_type = st.text_input("Event Type")
+        payout_method = st.selectbox("Payout Method", ["Chuyển khoản", "Tiền mặt"])
+
+        if st.form_submit_button("Submit Claim"):
+            if not contract_id.strip() or not event_type.strip():
+                st.warning("⚠️ Please fill in all required fields.")
+            else:
+                try:
+                    conn = get_connection()
+                    cursor = conn.cursor()
+                    cursor.callproc("Create_NewClaim", (
+                        contract_id, claim_date, amount,
+                        description, event_date, event_type, payout_method
+                    ))
+                    conn.commit()
+                    cursor.close()
+
+                    log_action(conn, user, "CREATE_CLAIM", f"{contract_id} - {amount} VNĐ")
+                    st.success("✅ Claim submitted.")
+                    st.rerun()
+                except Exception as e:
+                    st.error(f"❌ Error: {e}")
+                finally:
+                    conn.close()
+
+    # 11. Search Claims by ContractID
+    st.markdown("### 🔍 Search Claims by Contract ID")
+    with st.form("search_claim_form"):
+        search_id = st.text_input("Enter Contract ID to search claims")
+        if st.form_submit_button("Search"):
+            try:
+                conn = get_connection()
+                df_claims = pd.read_sql(f"CALL Search_Claims_By_ContractID('{search_id}')", conn)
+                st.dataframe(df_claims)
+                log_action(conn, user, "SEARCH_CLAIMS", f"By ContractID {search_id}")
+            except Exception as e:
+                st.error(f"❌ Error: {e}")
+            finally:
+                conn.close()
+
+
+
     conn.close()
