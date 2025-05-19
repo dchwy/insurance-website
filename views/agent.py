@@ -18,6 +18,12 @@ def render():
     if not agent_id:
         st.error("⚠️ No PersonInchargeID found in session.")
         st.stop()
+
+    # 3. View contracts assigned to this agent
+    st.markdown("### 📋 Your Contracts")
+    df_contracts = pd.read_sql(f"CALL Contract_By_Person('{agent_id}')", conn)
+    st.dataframe(df_contracts)
+
     # 1. Create Customer
     st.markdown("### 👤 Create New Customer")
     with st.form("create_customer"):
@@ -112,44 +118,39 @@ def render():
         del st.session_state["new_contract_id"]
 
 
-    # 3. View contracts assigned to this agent
-    st.markdown("### 📋 Your Contracts")
-    df_contracts = pd.read_sql(f"CALL Contract_By_Person('{agent_id}')", conn)
-    st.dataframe(df_contracts)
+    # 10. Create New Insurance Claim
+    st.markdown("### 📝 Create New Insurance Claim")
+    with st.form("create_claim_form"):
+        contract_id = st.text_input("Contract ID")
+        claim_date = st.date_input("Claim Date")
+        amount = st.number_input("Claim Amount", min_value=0)
+        description = st.text_area("Description")
+        event_date = st.date_input("Event Date")
+        event_type = st.text_input("Event Type")
+        payout_method = st.selectbox("Payout Method", ["Chuyển khoản", "Tiền mặt"])
 
-    # 4. View contract details for customer
-    st.markdown("### 🔍 Get Contract Details by Customer ID")
-    customer_lookup = st.text_input("Enter Customer ID", key="details_lookup")
-    if st.button("View Contract Details"):
-        conn = get_connection()  # ✅ Lấy kết nối tươi mới
-        try:
-            df_detail = pd.read_sql(f"CALL Get_ContractDetails('{customer_lookup}')", conn)
-            st.dataframe(df_detail)
-        except Exception as e:
-            st.error(f"❌ Error: {e}")
-        finally:
-            conn.close()
+        if st.form_submit_button("Submit Claim"):
+            if not contract_id.strip() or not event_type.strip():
+                st.warning("⚠️ Please fill in all required fields.")
+            else:
+                try:
+                    conn = get_connection()
+                    cursor = conn.cursor()
+                    cursor.callproc("Create_NewClaim", (
+                        contract_id, claim_date, amount,
+                        description, event_date, event_type, payout_method
+                    ))
+                    conn.commit()
+                    cursor.close()
 
+                    log_action(conn, user, "CREATE_CLAIM", f"{contract_id} - {amount} VNĐ")
+                    st.success("✅ Claim submitted.")
+                    st.rerun()
+                except Exception as e:
+                    st.error(f"❌ Error: {e}")
+                finally:
+                    conn.close()
 
-    # 5. View payout by contract
-    st.markdown("### 💸 Payout Details by Contract ID")
-    contract_lookup = st.text_input("Enter Contract ID", key="payout_lookup")
-
-    if st.button("View Payout Details"):
-        if not contract_lookup:
-            st.warning("⚠️ Please enter a contract ID.")
-        else:
-            try:
-                conn2 = get_connection()  # 🔁 lấy lại kết nối tươi
-                df_payout = pd.read_sql(f"CALL Payout_Detail_Summary('{contract_lookup}')", conn2)
-                if df_payout.empty:
-                    st.info("No payout data found for this contract.")
-                else:
-                    st.dataframe(df_payout)
-            except Exception as e:
-                st.error(f"❌ Error while retrieving payout: {e}")
-            finally:
-                conn2.close()
     #6
     st.markdown("### 👨 Add Insured Person")
     with st.form("add_insured_person"):
@@ -254,38 +255,20 @@ def render():
                     conn2.close()
 
 
-    # 10. Create New Insurance Claim
-    st.markdown("### 📝 Create New Insurance Claim")
-    with st.form("create_claim_form"):
-        contract_id = st.text_input("Contract ID")
-        claim_date = st.date_input("Claim Date")
-        amount = st.number_input("Claim Amount", min_value=0)
-        description = st.text_area("Description")
-        event_date = st.date_input("Event Date")
-        event_type = st.text_input("Event Type")
-        payout_method = st.selectbox("Payout Method", ["Chuyển khoản", "Tiền mặt"])
 
-        if st.form_submit_button("Submit Claim"):
-            if not contract_id.strip() or not event_type.strip():
-                st.warning("⚠️ Please fill in all required fields.")
-            else:
-                try:
-                    conn = get_connection()
-                    cursor = conn.cursor()
-                    cursor.callproc("Create_NewClaim", (
-                        contract_id, claim_date, amount,
-                        description, event_date, event_type, payout_method
-                    ))
-                    conn.commit()
-                    cursor.close()
-
-                    log_action(conn, user, "CREATE_CLAIM", f"{contract_id} - {amount} VNĐ")
-                    st.success("✅ Claim submitted.")
-                    st.rerun()
-                except Exception as e:
-                    st.error(f"❌ Error: {e}")
-                finally:
-                    conn.close()
+    # 4. View contract details for customer
+    st.markdown("### 🔍 Get Contract Details by Customer ID")
+    with st.form("search_contract_form"):  
+        customer_lookup = st.text_input("Enter Customer ID", key="details_lookup")
+        if st.form_submit_button("View Contract Details"):
+            conn = get_connection()  # ✅ Lấy kết nối tươi mới
+            try:
+                df_detail = pd.read_sql(f"CALL Get_ContractDetails('{customer_lookup}')", conn)
+                st.dataframe(df_detail)
+            except Exception as e:
+                st.error(f"❌ Error: {e}")
+            finally:
+                conn.close()
 
     # 11. Search Claims by ContractID
     st.markdown("### 🔍 Search Claims by Contract ID")
@@ -302,6 +285,26 @@ def render():
             finally:
                 conn.close()
 
+    # 5. View payout by contract
+    st.markdown("### 💸 Payout Details by Contract ID")
+    with st.form("search_payout_details"):  
+        contract_lookup = st.text_input("Enter Contract ID", key="payout_lookup")
+
+        if st.form_submit_button("View Payout Details"):
+            if not contract_lookup:
+                st.warning("⚠️ Please enter a contract ID.")
+            else:
+                try:
+                    conn2 = get_connection()  # 🔁 lấy lại kết nối tươi
+                    df_payout = pd.read_sql(f"CALL Payout_Detail_Summary('{contract_lookup}')", conn2)
+                    if df_payout.empty:
+                        st.info("No payout data found for this contract.")
+                    else:
+                        st.dataframe(df_payout)
+                except Exception as e:
+                    st.error(f"❌ Error while retrieving payout: {e}")
+                finally:
+                    conn2.close()
 
 
     conn.close()
