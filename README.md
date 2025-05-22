@@ -1,5 +1,5 @@
 ## 📌 Overview
-This project is a comprehensive Database Management System (DBMS) solution for managing insurance-related operations including customer profiles, insurance contracts, claims, assessments, payouts,etc...
+This project is a comprehensive Database Management System (DBMS) solution for managing insurance-related operations including customer profiles, insurance contracts, claims, assessments, payouts, etc...
 
 ## 🗃️ Technologies Used
 Database: MySQL
