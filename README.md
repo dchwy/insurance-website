@@ -16,3 +16,52 @@ This project was developed by a team of 4 students from DSEB - NATIONAL ECONOMIC
 * Pham Khanh Duong
 * Bui Viet Huy
 * Do Cong Huy
+
+🚀 Setup & Run
+Dưới đây là phần **`🚀 Setup & Run`** đã được viết lại rõ ràng và chuẩn hóa để bạn đưa vào file `README.md`:
+
+---
+
+## 🚀 Setup & Run
+
+### 1. Clone the repository
+
+```bash
+git clone https://github.com/yourusername/insurance-dbms.git
+cd insurance-dbms
+```
+
+### 2. Set up the database
+
+* Import the SQL schema and sample data into your MySQL server:
+
+```bash
+mysql -u your_username -p < schema.sql
+```
+
+### 3. Configure Python environment
+
+* Install required dependencies:
+
+```bash
+pip install -r requirements.txt
+```
+
+* Update the database connection settings in `config.py`:
+
+```python
+DB_CONFIG = {
+    'host': 'localhost',
+    'user': 'your_username',
+    'password': 'your_password',
+    'database': 'insurance_db'
+}
+```
+
+### 4. Run the application
+
+```bash
+python3 app/main.py
+```
+
+If you need account for testing DM me 
