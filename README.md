@@ -58,5 +58,5 @@ DB_CONFIG = {
 ```bash
 python3 app/main.py
 ```
-
-If you need account for testing DM me 
+[[HERE IS THE LINK FOR USER](https://insurance-demo-w.streamlit.app/)]
+If you need account for testing DM me  
