@@ -59,4 +59,4 @@ DB_CONFIG = {
 python3 app/main.py
 ```
 [[HERE IS THE LINK FOR USER](https://insurance-demo-w.streamlit.app/)]
-If you need account for testing DM me  
+[Testing Accounts](https://docs.google.com/spreadsheets/d/1IuyoQLqaKyXApejXfgvRytfD7C2lYDxo9do4ZZawtsA/edit?usp=sharing)
